@@ -1,1 +1,1 @@
-# booking_parser
+# Booking Parser (Python scraper)
