@@ -137,11 +137,20 @@ def parseAndSaveData(temp_dict):
       return {'status':3,'logs':result['arr_logs']}
     ###################
     result['hotel_info']['prop_url'] = prop_url
-    redis_key_hotel_info = str(datetime.datetime.now().date())+"-"+str(hotel_id)
+    ###################
+    #redis_key_hotel_info = str(datetime.datetime.now().date())+"-"+str(hotel_id)
+    #hotel_info_redis_value = obj_booking.obj_redis_cache.getKeyValue(redis_key_hotel_info)    
+    curr_date_str = str(datetime.datetime.now().date())
+    redis_key_hotel_info = str(hotel_id)
     hotel_info_redis_value = obj_booking.obj_redis_cache.getKeyValue(redis_key_hotel_info)
+    flag_compare_hotel = 1
+    #if redis is not updated today then compare the hotel info
+    if hotel_info_redis_value and curr_date_str in hotel_info_redis_value:      
+        flag_compare_hotel = 0
+    ###################
     #we insert/update the hotel info once in a day.
     #the redis key is mady by current date(current_date+hotel_id) 
-    if not hotel_info_redis_value:
+    if flag_compare_hotel:
       hotel_master_rows = obj_booking.obj_mongo_db.recSelect( 'hotel_master' , None, { 'hotel_id':hotel_id } )    
       if hotel_master_rows.count():
         print( "alredy inserted..." )
@@ -170,7 +179,7 @@ def parseAndSaveData(temp_dict):
         #result['hotel_info']['prop_id'] = temp_prop_id
         ret_id = obj_booking.obj_mongo_db.recInsert( 'hotel_master' , [ result['hotel_info'] ] )
         print( "\ninserted in hotel_master The return id is"+str(ret_id) )
-      obj_booking.obj_redis_cache.setKeyValue(redis_key_hotel_info,1)
+      obj_booking.obj_redis_cache.setKeyValue(redis_key_hotel_info,curr_date_str)
     #############################################################
     if 'room_price_details' in result:
       dict_room_price_details = result['room_price_details']
@@ -183,8 +192,13 @@ def parseAndSaveData(temp_dict):
               dict_room_info['hotel_id'] = hotel_id
               dict_room_info['room_type'] = key_room_type
               ###################              
-              redis_key_room_detail = str(datetime.datetime.now().date())+"-"+str(hotel_id)+"-"+str(key_room_type)
+              #redis_key_room_detail = str(datetime.datetime.now().date())+"-"+str(hotel_id)+"-"+str(key_room_type)
+              temp_curr_date_str = str(datetime.datetime.now().date())
+              redis_key_room_detail = str(hotel_id)+"-"+str(key_room_type)
               room_details_redis_value = obj_booking.obj_redis_cache.getKeyValue(redis_key_room_detail)
+              flag_compare_room_details = 1
+              if room_details_redis_value and temp_curr_date_str in room_details_redis_value:
+                flag_compare_room_details = 0
               ###################
               #this key not needed in room details table
               del dict_room_info['price_info']
@@ -192,7 +206,7 @@ def parseAndSaveData(temp_dict):
               #we check the room details once in a day(hotel_id,key_room_type)
               #the redis key is made by current_date+hotel_id+key_room_type
               #if this redis key is not exist then we decide the room details is inserted/updated
-              if not room_details_redis_value:
+              if flag_compare_room_details:
                 room_detail_rows = obj_booking.obj_mongo_db.recSelect( 'room_details' , None, { 'hotel_id':hotel_id,'room_type':key_room_type } )
                 #if room equipments are changed then we update the table
                 if room_detail_rows.count():
@@ -214,7 +228,7 @@ def parseAndSaveData(temp_dict):
                   ret_id = obj_booking.obj_mongo_db.recInsert( 'room_details' , [ dict_room_info ] )
                   print( "\ninserted in room_details The return id is"+str(ret_id) )
                 #set redis value for today(as room details inserted today)
-                obj_booking.obj_redis_cache.setKeyValue(redis_key_room_detail,1)
+                obj_booking.obj_redis_cache.setKeyValue(redis_key_room_detail,temp_curr_date_str)
             available_only = ""            
             for dict_price_info in arr_price_info:              
               #available_only = dict_price_info['max_persons']
