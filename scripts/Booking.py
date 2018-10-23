@@ -18,9 +18,10 @@ class Booking(Master):
   #def __del__(self):
   #      print('Destructor called, Booking deleted..............')
   def initProxies(self):
-    arr_proxies = []
-    if self.obj_helper.isFileExists( "proxies.txt" ):
-      content = self.obj_helper.readFile( "proxies.txt" )
+    arr_proxies = []    
+    proxy_file_path = self.obj_config.proxy_dir_path + "proxies.txt"
+    if self.obj_helper.isFileExists( proxy_file_path ):
+      content = self.obj_helper.readFile( proxy_file_path )
       lines = content.split("\n")
       for line in lines:
         if line:
