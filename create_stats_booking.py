@@ -9,6 +9,7 @@ import json
 import datetime
 import hashlib
 from datetime import timedelta, date 
+from bson.objectid import ObjectId
 
 #####################
 processoutput = os.popen("ps -A -L -F").read()
@@ -54,6 +55,17 @@ if __name__ == '__main__':
       if date_diffrence.days >=  parse_interval:
         dict_stats['property_pending'] = dict_stats['property_pending']+1
   ##########################################
+  #################
+  config_id = None
+  config_rows = obj_master.obj_mongo_db.recSelect('config')
+  if config_rows.count():
+    if '_id' in config_rows[0] and config_rows[0]['_id']:
+      config_id = config_rows[0]['_id']      
+  if dict_stats['property_pending'] == 0:
+    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'End','started_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
+  elif dict_stats['property_pending'] > 0:
+    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'currently not running','started_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )    
+  #################
   dict_stats['date'] = current_date_obj
   dict_where = { 'updated_at':{ '$gte': current_date_obj } }
   dict_stats['property_parsed'] = obj_master.obj_mongo_db.getCount('property_urls',None,dict_where)
@@ -77,4 +89,5 @@ if __name__ == '__main__':
     dict_stats['updated_at'] = datetime.datetime.now()
     ret_id = obj_master.obj_mongo_db.recInsert( 'stats_booking' , [dict_stats] )
     print( "\ninserted in stats table. The return id is"+str(ret_id) )
+
   

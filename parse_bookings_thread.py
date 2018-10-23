@@ -340,8 +340,8 @@ if __name__ == '__main__':
     sleep(2)
     exit()
   #set the status 'running' when we start parsing of data
-  if config_id:
-    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'running','started_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
+  #if config_id:
+  #  ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'running','started_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
   #set the pool max processed
   pool = multiprocessing.Pool(processes=max_process)  
   #fetch all property urls to parsed which parsed before the time intervel date  
@@ -362,6 +362,9 @@ if __name__ == '__main__':
         print("parse this property..")
       else:        
         continue
+    #set the status 'running' when we start parsing of data
+    if config_id:
+      ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'running','started_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
     #overwrite the value of main config if it exists in property
     if 'number_of_guests' in property_url_row and property_url_row['number_of_guests']:      
       number_of_guests = property_url_row['number_of_guests']
@@ -481,9 +484,9 @@ if __name__ == '__main__':
     if temp_config_rows.count():
       break
     #####################
-  if config_id:
-    #set the status in config file
-    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'end','ended_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
+  #if config_id:
+  #  #set the status in config file
+  #  ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'end','ended_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
   ####################
   returned_value = os.system('cd /var/www/html && /usr/bin/php artisan schedule:run > /dev/null 2>/dev/null &')
   if returned_value == 0:
