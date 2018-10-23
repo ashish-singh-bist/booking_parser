@@ -62,9 +62,9 @@ if __name__ == '__main__':
     if '_id' in config_rows[0] and config_rows[0]['_id']:
       config_id = config_rows[0]['_id']      
   if dict_stats['property_pending'] == 0:
-    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'End','started_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
+    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'End','updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
   elif dict_stats['property_pending'] > 0:
-    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'currently not running','started_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )    
+    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'currently not running','updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )    
   #################
   dict_stats['date'] = current_date_obj
   dict_where = { 'updated_at':{ '$gte': current_date_obj } }

@@ -484,15 +484,20 @@ if __name__ == '__main__':
     if temp_config_rows.count():
       break
     #####################
-  #if config_id:
-  #  #set the status in config file
-  #  ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'end','ended_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
+  if config_id:
+    #set the status in config file
+    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'end','ended_at':datetime.datetime.now(),'updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
   ####################
   returned_value = os.system('cd /var/www/html && /usr/bin/php artisan schedule:run > /dev/null 2>/dev/null &')
   if returned_value == 0:
     print( "script run successfully.." )
   else:
     print( "got some error in running script.." )
-  ####################
+  ######################################
+  #run this script when the script is end
+  script_dir_path = obj_master.obj_config.script_dir_path
+  command_str = 'cd '+script_dir_path+'; /usr/bin/python3 create_stats_booking.py > /dev/null 2>/dev/null &'
+  temp_returned_value = os.system(command_str)
+  ######################################
   exit()
 
