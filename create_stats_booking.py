@@ -64,7 +64,12 @@ if __name__ == '__main__':
   if dict_stats['property_pending'] == 0:
     ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'End','updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
   elif dict_stats['property_pending'] > 0:
-    ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'currently not running','updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )    
+    processoutput = os.popen("ps -A -L -F").read()    
+    res = re.findall('parse_bookings_thread.py',processoutput)
+    if len(res):
+      ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'running','updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
+    else:
+      ret_id = obj_master.obj_mongo_db.recUpdate( 'config' , { 'script_status':'currently not running','updated_at':datetime.datetime.now() } , { '_id':ObjectId(config_id) } )
   #################
   dict_stats['date'] = current_date_obj
   dict_where = { 'updated_at':{ '$gte': current_date_obj } }
